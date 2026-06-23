@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { Book, NewBook, SortType, ConditionFilter } from '@/types';
 import { mockBooks } from '@/data/mockBooks';
-import { getFilteredBooks } from '@/utils/bookFilter';
 
 interface BookStore {
   books: Book[];
@@ -13,7 +12,6 @@ interface BookStore {
   setSearchKeyword: (keyword: string) => void;
   setConditionFilter: (condition: ConditionFilter) => void;
   setSortType: (sort: SortType) => void;
-  filteredBooks: Book[];
 }
 
 const STORAGE_KEY = 'campus_books';
@@ -58,9 +56,4 @@ export const useBookStore = create<BookStore>((set, get) => ({
   setSearchKeyword: (keyword) => set({ searchKeyword: keyword }),
   setConditionFilter: (condition) => set({ conditionFilter: condition }),
   setSortType: (sort) => set({ sortType: sort }),
-
-  get filteredBooks() {
-    const { books, searchKeyword, conditionFilter, sortType } = get();
-    return getFilteredBooks(books, searchKeyword, conditionFilter, sortType);
-  },
 }));

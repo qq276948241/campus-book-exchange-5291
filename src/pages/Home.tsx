@@ -1,18 +1,17 @@
 import { useBookStore } from '@/store/useBookStore';
+import { useFilteredBooks } from '@/hooks/useFilteredBooks';
 import BookCard from '@/components/BookCard';
 import { BookOpen, Search } from 'lucide-react';
 import { CONDITION_ACTIVE_STYLES, CONDITION_OPTIONS, SORT_OPTIONS } from '@/constants';
 import type { BookCondition } from '@/types';
 
 export default function Home() {
-  const {
-    filteredBooks,
-    searchKeyword,
-    conditionFilter,
-    sortType,
-    setConditionFilter,
-    setSortType,
-  } = useBookStore();
+  const filteredBooks = useFilteredBooks();
+  const searchKeyword = useBookStore((state) => state.searchKeyword);
+  const conditionFilter = useBookStore((state) => state.conditionFilter);
+  const sortType = useBookStore((state) => state.sortType);
+  const setConditionFilter = useBookStore((state) => state.setConditionFilter);
+  const setSortType = useBookStore((state) => state.setSortType);
 
   const getResultText = () => {
     const parts: string[] = [];
