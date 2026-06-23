@@ -1,29 +1,8 @@
 import { useBookStore } from '@/store/useBookStore';
 import BookCard from '@/components/BookCard';
-import { BookOpen, Search, Clock, ArrowUpDown } from 'lucide-react';
-import type { BookCondition, SortType, ConditionFilter } from '@/types';
-
-const conditionOptions: { value: ConditionFilter; label: string }[] = [
-  { value: 'all', label: '全部' },
-  { value: '全新', label: '全新' },
-  { value: '九成新', label: '九成新' },
-  { value: '八成新', label: '八成新' },
-  { value: '七成新', label: '七成新' },
-  { value: '六成新及以下', label: '六成新' },
-];
-
-const sortOptions: { value: SortType; label: string; icon: typeof Clock }[] = [
-  { value: 'latest', label: '最新发布', icon: Clock },
-  { value: 'price-asc', label: '价格从低到高', icon: ArrowUpDown },
-];
-
-const conditionActiveColor: Record<BookCondition, string> = {
-  '全新': 'bg-emerald-500 text-white border-emerald-500',
-  '九成新': 'bg-sky-500 text-white border-sky-500',
-  '八成新': 'bg-blue-500 text-white border-blue-500',
-  '七成新': 'bg-amber-500 text-white border-amber-500',
-  '六成新及以下': 'bg-rose-500 text-white border-rose-500',
-};
+import { BookOpen, Search } from 'lucide-react';
+import { CONDITION_ACTIVE_STYLES, CONDITION_OPTIONS, SORT_OPTIONS } from '@/constants';
+import type { BookCondition } from '@/types';
 
 export default function Home() {
   const {
@@ -35,26 +14,20 @@ export default function Home() {
     setSortType,
   } = useBookStore();
 
-  const getFilterLabel = () => {
-    if (conditionFilter === 'all') return '';
-    return conditionFilter;
-  };
-
-  const getSortLabel = () => {
-    return sortOptions.find((s) => s.value === sortType)?.label || '';
-  };
-
   const getResultText = () => {
     const parts: string[] = [];
-    if (searchKeyword) {
-      parts.push(`搜索 "${searchKeyword}"`);
-    }
-    if (conditionFilter !== 'all') {
-      parts.push(`筛选 ${conditionFilter}`);
-    }
+    if (searchKeyword) parts.push(`搜索 "${searchKeyword}"`);
+    if (conditionFilter !== 'all') parts.push(`筛选 ${conditionFilter}`);
     parts.push(`共 ${filteredBooks.length} 本`);
     return parts.join(' · ');
   };
+
+  const getConditionActiveClass = (value: string) => {
+    if (value === 'all') return 'bg-primary-600 text-white border-primary-600';
+    return CONDITION_ACTIVE_STYLES[value as BookCondition];
+  };
+
+  const getSortLabel = () => SORT_OPTIONS.find((s) => s.value === sortType)?.label || '';
 
   return (
     <div className="container px-4 py-6 md:py-8">
@@ -76,19 +49,15 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-slate-400 mr-1">成色:</span>
-            {conditionOptions.map((opt) => {
+            {CONDITION_OPTIONS.map((opt) => {
               const isActive = conditionFilter === opt.value;
-              let activeClass = 'bg-primary-600 text-white border-primary-600';
-              if (opt.value !== 'all' && isActive) {
-                activeClass = conditionActiveColor[opt.value as BookCondition];
-              }
               return (
                 <button
                   key={opt.value}
                   onClick={() => setConditionFilter(opt.value)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                     isActive
-                      ? `${activeClass} shadow-md`
+                      ? `${getConditionActiveClass(opt.value)} shadow-md`
                       : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
                   }`}
                 >
@@ -102,7 +71,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400 mr-1">排序:</span>
-            {sortOptions.map((opt) => {
+            {SORT_OPTIONS.map((opt) => {
               const isActive = sortType === opt.value;
               const Icon = opt.icon;
               return (
@@ -129,9 +98,9 @@ export default function Home() {
             <div className="flex flex-wrap gap-2">
               {conditionFilter !== 'all' && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                  conditionActiveColor[conditionFilter as BookCondition]
+                  CONDITION_ACTIVE_STYLES[conditionFilter as BookCondition]
                 }`}>
-                  {getFilterLabel()}
+                  {conditionFilter}
                   <button
                     onClick={() => setConditionFilter('all')}
                     className="ml-1 hover:bg-white/20 rounded-full p-0.5 -mr-1"

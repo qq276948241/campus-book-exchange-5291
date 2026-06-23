@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Book, NewBook, SortType, ConditionFilter } from '@/types';
 import { mockBooks } from '@/data/mockBooks';
+import { getFilteredBooks } from '@/utils/bookFilter';
 
 interface BookStore {
   books: Book[];
@@ -20,9 +21,7 @@ const STORAGE_KEY = 'campus_books';
 const loadFromStorage = (): Book[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
+    if (stored) return JSON.parse(stored);
   } catch {
     console.error('Failed to load books from storage');
   }
@@ -35,14 +34,6 @@ const saveToStorage = (books: Book[]) => {
   } catch {
     console.error('Failed to save books to storage');
   }
-};
-
-const conditionOrder: Record<string, number> = {
-  '全新': 5,
-  '九成新': 4,
-  '八成新': 3,
-  '七成新': 2,
-  '六成新及以下': 1,
 };
 
 export const useBookStore = create<BookStore>((set, get) => ({
@@ -62,41 +53,14 @@ export const useBookStore = create<BookStore>((set, get) => ({
     saveToStorage(books);
   },
 
-  getBookById: (id) => {
-    return get().books.find((b) => b.id === id);
-  },
+  getBookById: (id) => get().books.find((b) => b.id === id),
 
-  setSearchKeyword: (keyword) => {
-    set({ searchKeyword: keyword });
-  },
-
-  setConditionFilter: (condition) => {
-    set({ conditionFilter: condition });
-  },
-
-  setSortType: (sort) => {
-    set({ sortType: sort });
-  },
+  setSearchKeyword: (keyword) => set({ searchKeyword: keyword }),
+  setConditionFilter: (condition) => set({ conditionFilter: condition }),
+  setSortType: (sort) => set({ sortType: sort }),
 
   get filteredBooks() {
     const { books, searchKeyword, conditionFilter, sortType } = get();
-    let result = [...books];
-
-    if (searchKeyword.trim()) {
-      const lower = searchKeyword.toLowerCase();
-      result = result.filter((b) => b.title.toLowerCase().includes(lower));
-    }
-
-    if (conditionFilter !== 'all') {
-      result = result.filter((b) => b.condition === conditionFilter);
-    }
-
-    if (sortType === 'latest') {
-      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (sortType === 'price-asc') {
-      result.sort((a, b) => a.price - b.price);
-    }
-
-    return result;
+    return getFilteredBooks(books, searchKeyword, conditionFilter, sortType);
   },
 }));

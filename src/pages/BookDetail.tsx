@@ -1,15 +1,8 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Barcode, MessageSquare, Phone, Smartphone, User } from 'lucide-react';
 import { useBookStore } from '@/store/useBookStore';
-import type { BookCondition, ContactType } from '@/types';
-
-const conditionStyles: Record<BookCondition, string> = {
-  '全新': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  '九成新': 'bg-sky-100 text-sky-700 border-sky-200',
-  '八成新': 'bg-blue-100 text-blue-700 border-blue-200',
-  '七成新': 'bg-amber-100 text-amber-700 border-amber-200',
-  '六成新及以下': 'bg-rose-100 text-rose-700 border-rose-200',
-};
+import { CONDITION_STYLES } from '@/constants';
+import type { ContactType } from '@/types';
 
 const contactIconMap: Record<ContactType, typeof Phone> = {
   'QQ': Smartphone,
@@ -66,7 +59,7 @@ export default function BookDetail() {
               <span className="text-3xl font-bold text-primary-600">{book.price}</span>
             </div>
             <div className="mt-3">
-              <span className={`tag-pill border ${conditionStyles[book.condition]}`}>
+              <span className={`tag-pill border ${CONDITION_STYLES[book.condition]}`}>
                 {book.condition}
               </span>
             </div>
