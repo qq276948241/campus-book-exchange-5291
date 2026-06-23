@@ -1,13 +1,17 @@
 import { create } from 'zustand';
-import type { Book, NewBook } from '@/types';
+import type { Book, NewBook, SortType, ConditionFilter } from '@/types';
 import { mockBooks } from '@/data/mockBooks';
 
 interface BookStore {
   books: Book[];
   searchKeyword: string;
+  conditionFilter: ConditionFilter;
+  sortType: SortType;
   addBook: (book: NewBook) => void;
   getBookById: (id: string) => Book | undefined;
   setSearchKeyword: (keyword: string) => void;
+  setConditionFilter: (condition: ConditionFilter) => void;
+  setSortType: (sort: SortType) => void;
   filteredBooks: Book[];
 }
 
@@ -33,9 +37,19 @@ const saveToStorage = (books: Book[]) => {
   }
 };
 
+const conditionOrder: Record<string, number> = {
+  '全新': 5,
+  '九成新': 4,
+  '八成新': 3,
+  '七成新': 2,
+  '六成新及以下': 1,
+};
+
 export const useBookStore = create<BookStore>((set, get) => ({
   books: loadFromStorage(),
   searchKeyword: '',
+  conditionFilter: 'all',
+  sortType: 'latest',
 
   addBook: (newBook) => {
     const book: Book = {
@@ -56,15 +70,33 @@ export const useBookStore = create<BookStore>((set, get) => ({
     set({ searchKeyword: keyword });
   },
 
+  setConditionFilter: (condition) => {
+    set({ conditionFilter: condition });
+  },
+
+  setSortType: (sort) => {
+    set({ sortType: sort });
+  },
+
   get filteredBooks() {
-    const { books, searchKeyword } = get();
-    if (!searchKeyword.trim()) {
-      return books;
+    const { books, searchKeyword, conditionFilter, sortType } = get();
+    let result = [...books];
+
+    if (searchKeyword.trim()) {
+      const lower = searchKeyword.toLowerCase();
+      result = result.filter((b) => b.title.toLowerCase().includes(lower));
     }
-    const lower = searchKeyword.toLowerCase();
-    return books.filter(
-      (b) =>
-        b.title.toLowerCase().includes(lower)
-    );
+
+    if (conditionFilter !== 'all') {
+      result = result.filter((b) => b.condition === conditionFilter);
+    }
+
+    if (sortType === 'latest') {
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortType === 'price-asc') {
+      result.sort((a, b) => a.price - b.price);
+    }
+
+    return result;
   },
 }));

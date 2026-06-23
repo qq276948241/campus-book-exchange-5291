@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Plus, BookOpen, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBookStore } from '@/store/useBookStore';
 
 export default function Navbar() {
@@ -8,6 +8,10 @@ export default function Navbar() {
   const location = useLocation();
   const { searchKeyword, setSearchKeyword } = useBookStore();
   const [localSearch, setLocalSearch] = useState(searchKeyword);
+
+  useEffect(() => {
+    setLocalSearch(searchKeyword);
+  }, [searchKeyword]);
 
   const isHome = location.pathname === '/';
 
